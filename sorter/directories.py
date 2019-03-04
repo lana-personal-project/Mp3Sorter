@@ -57,3 +57,15 @@ class DirectoriesForSorter:
             path = origin_path + '_' + str(suffix)
             have_duplicate = os.path.exists(path)
         return path
+
+    def remove_unnecessary_directories(self):
+        self._remove_unused_custom_directories()
+        if not os.listdir(self.exception_dir):
+            os.removedirs(self.exception_dir)
+        if not os.listdir(self.unknown_dir):
+            os.removedirs(self.unknown_dir)
+
+    def _remove_unused_custom_directories(self):
+        for key, path in self.custom_dirs.items():
+            if not os.listdir(path):
+                os.removedirs(path)

@@ -11,7 +11,7 @@ class Mp3Sorter:
     def __init__(self):
 
         self.TYPE = 'mp3'
-        self.bitrate_list = [128, 320]
+        self.bitrate_list = [128, 256, 320]
         self.directories = Directories()
         self.thread_pool = Pool()
 
@@ -37,6 +37,7 @@ class Mp3Sorter:
         self.thread_pool.map(self._sort_one, source_files)
         self.thread_pool.close()
         self.thread_pool.join()
+        self.directories.remove_unnecessary_directories()
         print('completed: ' + os.path.basename(self.directories.destination_dir))
 
     def _get_source_file_path_list(self, path_to_folder):
