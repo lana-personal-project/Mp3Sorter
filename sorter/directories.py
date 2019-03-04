@@ -26,7 +26,7 @@ class DirectoriesForSorter:
 
     def _setup_destination_directory(self):
         destination_directory = self.source_dir + '_sorted'
-        destination_directory = self.handle_duplicate(destination_directory)
+        destination_directory = self._handle_duplicate(destination_directory)
         self.create_dir(destination_directory)
         self.destination_dir = destination_directory
 
@@ -45,10 +45,10 @@ class DirectoriesForSorter:
         self.custom_dirs = directory_names
 
     def create_dir(self, path):
-        path = self.handle_duplicate(path)
+        path = self._handle_duplicate(path)
         os.mkdir(path)
 
-    def handle_duplicate(self, path):
+    def _handle_duplicate(self, path):
         origin_path = path
         suffix = 1
         have_duplicate = os.path.exists(path)
