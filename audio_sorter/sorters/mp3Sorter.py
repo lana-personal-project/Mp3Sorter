@@ -3,7 +3,8 @@ from audio_sorter.sorters.sorter import AbstractSorter
 
 class Mp3Sorter(AbstractSorter):
 
-    def __init__
+    def __init__(self):
+
 
     def _setup_directory(self):
         bitrate_and_contained_directory_dict = {}
