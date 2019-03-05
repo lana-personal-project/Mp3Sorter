@@ -9,15 +9,28 @@ class Mp3Sorter(AbstractSorter):
         AbstractSorter.__init__(self)
         self.TYPE = 'mp3'
         self._bitrate_list = [128, 256, 320]
-        self._default_directories = {'exception': 'unsorted', 'non_mp3': 'nonMp3'}
+        self._default_directories = {'exception': 'unsorted', 'non_mp3': 'nonMp3', }
 
     def _setup_destination_directory(self):
         source = self._source_directory
         destination = source + '_sorted'
         self._destination_directory = self._directories.get_new_name_if_have_duplicate(destination)
+        self._directories.create_dir_if_not_exist(self._destination_directory)
 
     def _setup_directories(self):
-        pass
+        self._insert_bitrate_directories_into_default_directories()
+        self._directories.create_directories(self._get_full_path_default_directories())
+
+    def _insert_bitrate_directories_into_default_directories(self):
+        for bitrate in self._bitrate_list:
+            self._default_directories.update({str(bitrate): str(bitrate) + 'kbps'})
+
+    def _get_full_path_default_directories(self):
+        directories_full_path = {}
+        for key, directory in self._default_directories.items():
+            directory = os.path.join(self._destination_directory, directory)
+            directories_full_path.update({key: directory})
+        return directories_full_path
 
     def sort(self):
         source_files = self._get_all_file_in_source()
@@ -34,21 +47,20 @@ class Mp3Sorter(AbstractSorter):
 
     def _get_sorted_path(self, source_file):
         audio = self._audio.File(source_file)
-        mp3 = self._audio.Mp3(source_file)
         file_name = os.path.basename(source_file)
-
         if audio is None:
             return None
-        if mp3 is None:
+        try:
+            mp3 = self._audio.mp3.MP3(source_file)
+            bitrate_by_kbps = round(mp3.info.bitrate / 1000)
+            for bitrate in self._bitrate_list:
+                if bitrate_by_kbps == bitrate:
+                    return os.path.join(self._directories.map[str(bitrate)], file_name)
+
+            file_name = str(bitrate_by_kbps) + '_' + file_name
+            return os.path.join(self._directories.map['exception'], file_name)
+        except self._audio.mp3.HeaderNotFoundError:
             return os.path.join(self._directories.map['non_mp3'], file_name)
-
-        bitrate_by_kbps = round(mp3.info.bitrate / 1000)
-        for bitrate in self._bitrate_list:
-            if bitrate_by_kbps == bitrate:
-                return os.path.join(self._directories.map[bitrate], file_name)
-
-        file_name = str(bitrate_by_kbps) + '_' + file_name
-        return os.path.join(self._directories.map['exception'], file_name)
 
     def _copy(self, src, dst):
         if dst is not None:

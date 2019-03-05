@@ -11,13 +11,12 @@ class Directories:
 
     def create_directory(self, key, directory):
         origin_directory_dict = self.map
-        key_exist = origin_directory_dict[key]
-        if key_exist:
+        if key in origin_directory_dict:
             raise Exception('directory\'s key already exist')
-        self._create_dir_if_not_exist(directory)
+        self.create_dir_if_not_exist(directory)
         origin_directory_dict.update({key: directory})
 
-    def _create_dir_if_not_exist(self, path):
+    def create_dir_if_not_exist(self, path):
         if not os.path.exists(path):
             os.mkdir(path)
 
@@ -32,7 +31,10 @@ class Directories:
         return path
 
     def remove_unused_directories_in_dict(self):
+        removed_keys = []
         for key, path in self.map.items():
             if not os.listdir(path):
                 os.removedirs(path)
-                del self.map[key]
+                removed_keys.append(key)
+        for key in removed_keys:
+            del self.map[key]

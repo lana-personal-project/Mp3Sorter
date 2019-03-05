@@ -27,9 +27,9 @@ class AbstractSorter(ABC):
         self._thread_pool = Pool(threads_for_running)
 
     def _setup_source_directory_from_input(self):
-        source = input('source directory path: ')
-        if not os.path.exists(source):
-            self._setup_source_directory_from_input()
+        source = ''
+        while not os.path.exists(source):
+            source = input('source directory path: ')
         self._source_directory = source
 
     def _get_all_file_in_source(self):
