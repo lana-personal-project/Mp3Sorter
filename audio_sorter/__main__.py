@@ -1,4 +1,4 @@
-from sorters.sorter import Sorter
+from audio_sorter.sorters.sorter import Sorter
 
 
 sorter = Sorter()

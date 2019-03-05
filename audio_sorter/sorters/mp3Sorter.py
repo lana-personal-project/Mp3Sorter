@@ -1,27 +1,9 @@
-import shutil
-import os
-from multiprocessing.dummy import Pool
-import multiprocessing
-from sorters.directories import Directories
-
-import mutagen
+from audio_sorter.sorters.sorter import AbstractSorter
 
 
-class Sorter:
-    def __init__(self):
+class Mp3Sorter(AbstractSorter):
 
-        self.bitrate_list = [128, 256, 320]
-        self.directories = Directories()
-        self.thread_pool = Pool()
-
-    def setup(self):
-        self._setup_thread_pool()
-        self._setup_directory()
-
-    def _setup_thread_pool(self):
-        max_thread = multiprocessing.cpu_count()
-        threads_for_running = max_thread - 1
-        self.thread_pool = Pool(threads_for_running)
+    def __init__
 
     def _setup_directory(self):
         bitrate_and_contained_directory_dict = {}
@@ -60,7 +42,7 @@ class Sorter:
         bitrate_by_kbps = round(file.info.bitrate / 1000)
         for bitrate in self.bitrate_list:
             if bitrate_by_kbps == bitrate:
-                sort_directory_path_dict = self.directories.custom_dirs
+                sort_directory_path_dict = self.directories.directory_dict
                 return os.path.join(sort_directory_path_dict[bitrate], file_name)
 
         file_name = str(bitrate_by_kbps) + '_' + file_name
