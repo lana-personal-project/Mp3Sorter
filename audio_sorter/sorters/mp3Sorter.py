@@ -23,7 +23,7 @@ class Mp3Sorter(AbstractSorter):
 
     def _insert_bitrate_directories_into_default_directories(self):
         for bitrate in self._bitrate_list:
-            self._default_directories.update({str(bitrate): str(bitrate) + 'kbps'})
+            self._default_directories.update({str(bitrate): str(bitrate) + 'Kbps'})
 
     def _get_full_path_default_directories(self):
         directories_full_path = {}
@@ -39,7 +39,7 @@ class Mp3Sorter(AbstractSorter):
         self._thread_pool.close()
         self._thread_pool.join()
         self._directories.remove_unused_directories_in_dict()
-        print('completed: ' + os.path.basename(self._destination_directory))
+        print('completed: ' + self._destination_directory)
 
     def _sort_one(self, source_file):
         sorted_file = self._get_sorted_path(source_file)
@@ -53,14 +53,16 @@ class Mp3Sorter(AbstractSorter):
         try:
             mp3 = self._audio.mp3.MP3(source_file)
             bitrate_by_kbps = round(mp3.info.bitrate / 1000)
-            for bitrate in self._bitrate_list:
-                if bitrate_by_kbps == bitrate:
-                    return os.path.join(self._directories.map[str(bitrate)], file_name)
-
-            file_name = str(bitrate_by_kbps) + '_' + file_name
-            return os.path.join(self._directories.map['exception'], file_name)
+            return self._get_sorted_part_by_bitrate(bitrate_by_kbps, file_name)
         except self._audio.mp3.HeaderNotFoundError:
             return os.path.join(self._directories.map['non_mp3'], file_name)
+
+    def _get_sorted_part_by_bitrate(self, bitrate_by_kbps, file_name):
+        for bitrate in self._bitrate_list:
+            if bitrate_by_kbps == bitrate:
+                return os.path.join(self._directories.map[str(bitrate)], file_name)
+        file_name = str(bitrate_by_kbps) + '_' + file_name
+        return os.path.join(self._directories.map['exception'], file_name)
 
     def _copy(self, src, dst):
         if dst is not None:
