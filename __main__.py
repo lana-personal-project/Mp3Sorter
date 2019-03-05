@@ -1,4 +1,4 @@
-from sorter.mp3Sorter import Mp3Sorter as Sorter
+from sorters.sorter import Sorter
 
 
 sorter = Sorter()

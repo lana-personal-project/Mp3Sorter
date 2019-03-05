@@ -1,7 +1,7 @@
 import os
 
 
-class DirectoriesForSorter:
+class Directories:
     def __init__(self):
         self.source_dir = ''
         self.destination_dir = ''

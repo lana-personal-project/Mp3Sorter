@@ -2,15 +2,14 @@ import shutil
 import os
 from multiprocessing.dummy import Pool
 import multiprocessing
-from sorter.directories import DirectoriesForSorter as Directories
+from sorters.directories import Directories
 
 import mutagen
 
 
-class Mp3Sorter:
+class Sorter:
     def __init__(self):
 
-        self.TYPE = 'mp3'
         self.bitrate_list = [128, 256, 320]
         self.directories = Directories()
         self.thread_pool = Pool()
