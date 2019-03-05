@@ -1,59 +1,61 @@
 from audio_sorter.sorters.sorter import AbstractSorter
+import os
+import shutil
 
 
 class Mp3Sorter(AbstractSorter):
 
     def __init__(self):
+        AbstractSorter.__init__(self)
+        self.TYPE = 'mp3'
+        self._bitrate_list = [128, 256, 320]
+        self._default_directories = {'exception': 'unsorted', 'non_mp3': 'nonMp3'}
 
+    def _setup_destination_directory(self):
+        source = self._source_directory
+        destination = source + '_sorted'
+        self._destination_directory = self._directories.get_new_name_if_have_duplicate(destination)
 
-    def _setup_directory(self):
-        bitrate_and_contained_directory_dict = {}
-        for bitrate in self.bitrate_list:
-            bitrate_and_contained_directory_dict.update({bitrate: str(bitrate)})
-        self.directories.setup(bitrate_and_contained_directory_dict)
+    def _setup_directories(self):
+        pass
 
     def sort(self):
-        source_directory = self.directories.source_dir
-        source_files = self._get_source_file_path_list(source_directory)
+        source_files = self._get_all_file_in_source()
 
-        self.thread_pool.map(self._sort_one, source_files)
-        self.thread_pool.close()
-        self.thread_pool.join()
-        self.directories.remove_unnecessary_directories()
-        print('completed: ' + os.path.basename(self.directories.destination_dir))
-
-    def _get_source_file_path_list(self, path_to_folder):
-        file_list = []
-        for root, directories, files in os.walk(path_to_folder):
-            for file in files:
-                full_file_path = os.path.join(root, file)
-                file_list.append(full_file_path)
-        return file_list
+        self._thread_pool.map(self._sort_one, source_files)
+        self._thread_pool.close()
+        self._thread_pool.join()
+        self._directories.remove_unused_directories_in_dict()
+        print('completed: ' + os.path.basename(self._destination_directory))
 
     def _sort_one(self, source_file):
         sorted_file = self._get_sorted_path(source_file)
         self._copy(source_file, sorted_file)
 
     def _get_sorted_path(self, source_file):
-        file = mutagen.File(source_file)
+        audio = self._audio.File(source_file)
+        mp3 = self._audio.Mp3(source_file)
         file_name = os.path.basename(source_file)
-        if file is None:
-            return os.path.join(self.directories.unknown_dir, file_name)
 
-        bitrate_by_kbps = round(file.info.bitrate / 1000)
-        for bitrate in self.bitrate_list:
+        if audio is None:
+            return None
+        if mp3 is None:
+            return os.path.join(self._directories.map['non_mp3'], file_name)
+
+        bitrate_by_kbps = round(mp3.info.bitrate / 1000)
+        for bitrate in self._bitrate_list:
             if bitrate_by_kbps == bitrate:
-                sort_directory_path_dict = self.directories.directory_dict
-                return os.path.join(sort_directory_path_dict[bitrate], file_name)
+                return os.path.join(self._directories.map[bitrate], file_name)
 
         file_name = str(bitrate_by_kbps) + '_' + file_name
-        return os.path.join(self.directories.exception_dir, file_name)
+        return os.path.join(self._directories.map['exception'], file_name)
 
     def _copy(self, src, dst):
-        file_name, extension = os.path.splitext(dst)
-        suffix = 1
-        while os.path.exists(dst):
-            suffix += 1
-            new_file_name = file_name + '_' + str(suffix)
-            dst = new_file_name + extension
-        shutil.copyfile(src, dst)
+        if dst is not None:
+            file_name, extension = os.path.splitext(dst)
+            suffix = 1
+            while os.path.exists(dst):
+                suffix += 1
+                new_file_name = file_name + '_' + str(suffix)
+                dst = new_file_name + extension
+            shutil.copyfile(src, dst)

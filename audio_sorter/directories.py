@@ -3,14 +3,14 @@ import os
 
 class Directories:
     def __init__(self):
-        self.directory_dict = {}
+        self.map = {}
 
     def create_directories(self, directory_dict: dict):
         for key, directory in directory_dict.items():
             self.create_directory(key, directory)
 
     def create_directory(self, key, directory):
-        origin_directory_dict = self.directory_dict
+        origin_directory_dict = self.map
         key_exist = origin_directory_dict[key]
         if key_exist:
             raise Exception('directory\'s key already exist')
@@ -32,7 +32,7 @@ class Directories:
         return path
 
     def remove_unused_directories_in_dict(self):
-        for key, path in self.directory_dict.items():
+        for key, path in self.map.items():
             if not os.listdir(path):
                 os.removedirs(path)
-                del self.directory_dict[key]
+                del self.map[key]
